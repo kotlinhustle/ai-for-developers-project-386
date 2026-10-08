@@ -1,0 +1,27 @@
+.app {
+  text-align: center;
+  padding: 2rem;
+}
+
+.status {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.status--loading {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.status--up {
+  background: #d3f9d8;
+  color: #2b8a3e;
+}
+
+.status--down {
+  background: #ffe3e3;
+  color: #c92a2a;
+}

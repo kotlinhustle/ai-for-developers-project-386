@@ -1,29 +1,123 @@
 # Календарь звонков
 
-
 [![hexlet-check](https://github.com/kotlinhustle/ai-for-developers-project-386/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/kotlinhustle/ai-for-developers-project-386/actions)
 
-Разработайте совместно с ИИ сервис для бронирования календаря
+Учебный проект Хекслета: сервис для бронирования календаря.
+Программа: https://ru.hexlet.io/programs/ai-for-developers
 
-Учебный проект Хекслета: https://ru.hexlet.io/programs/ai-for-developers
-Как это должно работать: https://files.hexlet.app/a/2ipc5m
+Текущая версия каркаса — учебная, без бизнес-логики.
 
 ## Стек
 
-- Разное
+- **backend/** — Kotlin, Spring Boot 4.1.1, JDK 21, Gradle Kotlin DSL + Gradle Wrapper 9.7.1, Spring Boot Actuator.
+- **frontend/** — React 19, TypeScript 6.0, Vite 8.3, ESLint.
 
-## Установка
+Зафиксированные версии: Spring Boot `4.1.1`, Kotlin `2.3.21`, Gradle `9.7.1`, React `19.3.0`, Vite `8.3.4`, TypeScript `~6.0.2`, ESLint `10.12.0`, ktlint-gradle `14.2.0`.
 
-<!-- Опишите установку: клонирование, зависимости, переменные окружения -->
+## Структура
 
-```bash
-git clone https://github.com/kotlinhustle/ai-for-developers-project-386.git
-cd ai-for-developers-project-386
+```
+.
+├── backend/                     # Kotlin + Spring Boot
+│   ├── src/main/kotlin/         # код приложения
+│   ├── src/main/resources/      # application.properties
+│   ├── src/test/kotlin/         # тесты (в т.ч. HealthSmokeTest)
+│   └── build.gradle.kts
+├── frontend/                    # React + TypeScript + Vite
+│   ├── src/                     # код приложения
+│   ├── vite.config.ts           # proxy /api -> backend
+│   └── eslint.config.js
+├── .github/workflows/           # CI, release-please, проверка заголовков PR
+├── release-please-config.json   # настройки релизов
+├── .release-please-manifest.json
+└── version.txt
 ```
 
-## Использование
+## Требования
 
-<!-- Добавьте примеры запуска и запись asciinema — именно это смотрит работодатель -->
+- JDK 21
+- Node.js 24 и npm
+- (опционально) IntelliJ IDEA
+
+Gradle устанавливать не нужно — используется wrapper из `backend/`.
+
+## Запуск бэкенда
+
+Windows (PowerShell):
+
+```powershell
+cd backend
+.\gradlew.bat bootRun
+```
+
+Linux / macOS:
+
+```bash
+cd backend
+./gradlew bootRun
+```
+
+Проверка:
+
+```bash
+curl http://localhost:8080/actuator/health
+# {"status":"UP"}
+```
+
+## Запуск фронтенда
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Откройте http://localhost:5173 — на стартовой странице отображается статус
+доступности бэкенда. Запросы к `/api/*` проксируются на `http://localhost:8080`
+(см. `frontend/vite.config.ts`), поэтому бэкенд должен быть запущен.
+
+## Проверки
+
+Бэкенд (линтер, тесты, сборка):
+
+Windows:
+
+```powershell
+cd backend
+.\gradlew.bat ktlintCheck test build
+```
+
+Linux / macOS:
+
+```bash
+cd backend
+./gradlew ktlintCheck test build
+```
+
+Автоформат Kotlin-кода: замените `ktlintCheck` на `ktlintFormat`.
+
+Фронтенд (линтер, типы, сборка):
+
+```bash
+cd frontend
+npm ci
+npm run lint
+npm run typecheck
+npm run build
+```
+
+## CI и релизы
+
+- `.github/workflows/ci.yml` — на `push` и `pull_request` запускает линтеры,
+  тесты, проверку типов и сборку обоих проектов.
+- `.github/workflows/release-please.yml` — на push в `main` обновляет версию и
+  CHANGELOG на основе Conventional Commits.
+- `.github/workflows/pr-title.yml` — проверяет, что заголовок PR соответствует
+  Conventional Commits.
+
+Версия приложения (`0.1.0`) синхронизирована между `version.txt`,
+`.release-please-manifest.json`, `backend/build.gradle.kts` и
+`frontend/package.json`. release-please обновляет все эти файлы при релизе.
 
 ---
 
