@@ -11,10 +11,11 @@ backend/                       Kotlin + Spring Boot 4.1.1, JDK 21, Gradle Wrappe
   src/main/kotlin/             код приложения
   src/main/resources/          application.properties
   src/test/kotlin/             тесты, включая HealthSmokeTest (random port, /actuator/health)
-frontend/                      React 19 + TypeScript 6.0 + Vite 8.3
-  vite.config.ts               proxy /api -> http://localhost:8080
+frontend/                      React 19 + TypeScript 6.0 + Vite 8.3 + react-router 8
+  vite.config.ts               proxy /api -> http://localhost:8080, конфиг Vitest
   eslint.config.js             ESLint flat config
-  src/                         код приложения
+  src/pages/                   HomePage, BookingPage
+  src/App.test.tsx             тесты (Vitest + Testing Library)
 .github/workflows/
   ci.yml                       push + pull_request: линтеры, тесты, типы, сборка
   release-please.yml           push в main: версия и CHANGELOG
@@ -55,10 +56,12 @@ cd frontend
 npm ci            # или npm install при первом запуске
 npm run lint
 npm run typecheck
+npm test
 npm run build
 ```
 
 - Запуск dev-сервера: `npm run dev` (http://localhost:5173).
+- Ограничение зависимостей: `react-router` — единственная новая runtime-зависимость; тестовые пакеты (Vitest, Testing Library, jsdom) — только `devDependencies`.
 
 Все команды из этого файла проверены локально.
 

@@ -10,9 +10,11 @@
 ## Стек
 
 - **backend/** — Kotlin, Spring Boot 4.1.1, JDK 21, Gradle Kotlin DSL + Gradle Wrapper 9.7.1, Spring Boot Actuator.
-- **frontend/** — React 19, TypeScript 6.0, Vite 8.3, ESLint.
+- **frontend/** — React 19, TypeScript 6.0, Vite 8.3, react-router 8, ESLint, Vitest + Testing Library.
 
 Зафиксированные версии: Spring Boot `4.1.1`, Kotlin `2.3.21`, Gradle `9.7.1`, React `19.3.0`, Vite `8.3.4`, TypeScript `~6.0.2`, ESLint `10.12.0`, ktlint-gradle `14.2.0`.
+
+Ограничение зависимостей frontend: `react-router` — **единственная новая runtime-зависимость**. Всё тестовое (Vitest, Testing Library, jsdom) — только `devDependencies`.
 
 ## Структура
 
@@ -24,8 +26,10 @@
 │   ├── src/test/kotlin/         # тесты (в т.ч. HealthSmokeTest)
 │   └── build.gradle.kts
 ├── frontend/                    # React + TypeScript + Vite
-│   ├── src/                     # код приложения
-│   ├── vite.config.ts           # proxy /api -> backend
+│   ├── src/
+│   │   ├── pages/               # HomePage, BookingPage
+│   │   └── App.test.tsx         # тесты (Vitest + Testing Library)
+│   ├── vite.config.ts           # proxy /api -> backend, конфиг Vitest
 │   └── eslint.config.js
 ├── .github/workflows/           # CI, release-please, проверка заголовков PR
 ├── release-please-config.json   # настройки релизов
@@ -72,9 +76,9 @@ npm install
 npm run dev
 ```
 
-Откройте http://localhost:5173 — на стартовой странице отображается статус
-доступности бэкенда. Запросы к `/api/*` проксируются на `http://localhost:8080`
-(см. `frontend/vite.config.ts`), поэтому бэкенд должен быть запущен.
+Откройте http://localhost:5173 — на главной странице описано, как работает
+сервис, а кнопка «Записаться на звонок» ведёт на `/booking`. Запросы к `/api/*`
+проксируются на `http://localhost:8080` (см. `frontend/vite.config.ts`).
 
 ## Проверки
 
@@ -103,6 +107,7 @@ cd frontend
 npm ci
 npm run lint
 npm run typecheck
+npm test
 npm run build
 ```
 
