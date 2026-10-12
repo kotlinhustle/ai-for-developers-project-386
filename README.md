@@ -27,7 +27,8 @@
 │   └── build.gradle.kts
 ├── frontend/                    # React + TypeScript + Vite
 │   ├── src/
-│   │   ├── pages/               # HomePage, BookingPage
+│   │   ├── pages/               # HomePage, BookingPage, OwnerPage
+│   │   ├── api.ts               # сконфигурированный клиент из generated/
 │   │   └── App.test.tsx         # тесты (Vitest + Testing Library)
 │   ├── vite.config.ts           # proxy /api -> backend, конфиг Vitest
 │   └── eslint.config.js
@@ -47,6 +48,24 @@
 - (опционально) IntelliJ IDEA
 
 Gradle устанавливать не нужно — используется wrapper из `backend/`.
+
+## База данных
+
+Бэкенд использует Postgres. Для локального запуска поднимите его, например через
+Docker Compose (в корне репозитория):
+
+```bash
+docker compose up -d
+```
+
+Параметры подключения по умолчанию (переопределяются переменными окружения
+`DB_URL`, `DB_USER`, `DB_PASSWORD`):
+
+- URL: `jdbc:postgresql://localhost:5432/calendar`
+- пользователь: `postgres`
+- пароль: `postgres`
+
+Тесты бэкенда Postgres не требуют — поднимается встроенный (embedded) Postgres.
 
 ## Запуск бэкенда
 

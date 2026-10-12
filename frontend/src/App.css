@@ -92,6 +92,26 @@
   background: #fff;
 }
 
+.form {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.form__field {
+  display: grid;
+  gap: 0.25rem;
+  font-weight: 600;
+}
+
+.form__input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  font: inherit;
+}
+
 .footer {
   display: flex;
   flex-wrap: wrap;

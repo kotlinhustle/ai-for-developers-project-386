@@ -14,7 +14,7 @@ backend/                       Kotlin + Spring Boot 4.1.1, JDK 21, Gradle Wrappe
 frontend/                      React 19 + TypeScript 6.0 + Vite 8.3 + react-router 8
   vite.config.ts               proxy /api -> http://localhost:8080, конфиг Vitest
   eslint.config.js             ESLint flat config
-  src/pages/                   HomePage, BookingPage
+  src/pages/                   HomePage, BookingPage, OwnerPage
   src/App.test.tsx             тесты (Vitest + Testing Library)
 spec/                          TypeSpec-источник контракта (main.tsp, tspconfig.yaml)
   npm run generate             TypeSpec -> OpenAPI -> клиентский SDK + серверные артефакты
@@ -50,6 +50,7 @@ cd backend
 
 - Автоформат Kotlin: `.\gradlew.bat ktlintFormat` (или `./gradlew ktlintFormat`).
 - Запуск: `.\gradlew.bat bootRun` (или `./gradlew bootRun`), health: `http://localhost:8080/actuator/health`.
+- Бэкенду нужен Postgres (см. `docker-compose.yml`, переменные `DB_URL`/`DB_USER`/`DB_PASSWORD`); тесты используют встроенный Postgres (embedded) и внешней БД не требуют.
 
 Фронтенд:
 

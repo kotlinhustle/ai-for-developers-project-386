@@ -1,46 +1,15 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
-import { Configuration, MeetingTypesApi } from '../generated/api'
-import type { MeetingType } from '../generated/api'
-
-const meetingTypesApi = new MeetingTypesApi(new Configuration({ basePath: '/api' }))
-
-type LoadState = 'loading' | 'ready' | 'error'
+import { useMeetingTypes } from '../useMeetingTypes'
 
 function BookingPage() {
-  const [state, setState] = useState<LoadState>('loading')
-  const [meetingTypes, setMeetingTypes] = useState<MeetingType[]>([])
-
-  useEffect(() => {
-    let active = true
-
-    meetingTypesApi
-      .meetingTypesList()
-      .then((types) => {
-        if (active) {
-          setMeetingTypes(types)
-          setState('ready')
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setState('error')
-        }
-      })
-
-    return () => {
-      active = false
-    }
-  }, [])
+  const { meetingTypes, state } = useMeetingTypes()
 
   return (
     <main className="page page--narrow">
       <h1 className="hero__title">Страница записи</h1>
 
       {state === 'loading' && <p className="status status--loading">Загрузка типов встреч…</p>}
-      {state === 'error' && (
-        <p className="status status--down">Не удалось загрузить типы встреч</p>
-      )}
+      {state === 'error' && <p className="status status--down">Не удалось загрузить типы встреч</p>}
       {state === 'ready' && meetingTypes.length === 0 && (
         <p className="status status--loading">Пока нет доступных типов встреч</p>
       )}
