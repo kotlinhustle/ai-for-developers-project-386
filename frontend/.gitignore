@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Generated from TypeSpec/OpenAPI — do not edit, regenerate with `npm run generate`
+src/generated/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

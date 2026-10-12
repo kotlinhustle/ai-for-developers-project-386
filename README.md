@@ -31,6 +31,9 @@
 │   │   └── App.test.tsx         # тесты (Vitest + Testing Library)
 │   ├── vite.config.ts           # proxy /api -> backend, конфиг Vitest
 │   └── eslint.config.js
+├── spec/                        # TypeSpec-источник контракта (Design First)
+│   ├── main.tsp
+│   └── tspconfig.yaml
 ├── .github/workflows/           # CI, release-please, проверка заголовков PR
 ├── release-please-config.json   # настройки релизов
 ├── .release-please-manifest.json
@@ -110,6 +113,21 @@ npm run typecheck
 npm test
 npm run build
 ```
+
+## Генерация API
+
+Контракт описан в TypeSpec (`spec/`). Одна команда генерирует OpenAPI, клиентский
+SDK (TypeScript) и серверные артефакты (Kotlin/Spring):
+
+```bash
+cd spec
+npm install        # только при первом запуске
+npm run generate
+```
+
+Генерируемые каталоги (`spec/tsp-output/`, `frontend/src/generated/`,
+`backend/build/generated/`) не редактируются руками и не коммитятся — CI
+регенерирует их перед сборкой.
 
 ## CI и релизы
 

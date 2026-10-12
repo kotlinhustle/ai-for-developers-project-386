@@ -16,6 +16,8 @@ frontend/                      React 19 + TypeScript 6.0 + Vite 8.3 + react-rout
   eslint.config.js             ESLint flat config
   src/pages/                   HomePage, BookingPage
   src/App.test.tsx             тесты (Vitest + Testing Library)
+spec/                          TypeSpec-источник контракта (main.tsp, tspconfig.yaml)
+  npm run generate             TypeSpec -> OpenAPI -> клиентский SDK + серверные артефакты
 .github/workflows/
   ci.yml                       push + pull_request: линтеры, тесты, типы, сборка
   release-please.yml           push в main: версия и CHANGELOG
@@ -62,6 +64,18 @@ npm run build
 
 - Запуск dev-сервера: `npm run dev` (http://localhost:5173).
 - Ограничение зависимостей: `react-router` — единственная новая runtime-зависимость; тестовые пакеты (Vitest, Testing Library, jsdom) — только `devDependencies`.
+
+Генерация контракта (Design First), из `spec/`:
+
+```bash
+cd spec
+npm ci            # или npm install при первом запуске
+npm run generate
+```
+
+- Одна команда: TypeSpec → OpenAPI → клиентский SDK (TS) и серверные артефакты (Kotlin/Spring).
+- Сгенерированные каталоги (`spec/tsp-output/`, `frontend/src/generated/`, `backend/build/generated/`) руками не редактируются и не коммитятся; CI регенерирует их перед сборкой.
+- Backend компилирует сгенерированные Kotlin-интерфейсы (`build/generated/openapi/...`), ktlint их исключает.
 
 Все команды из этого файла проверены локально.
 

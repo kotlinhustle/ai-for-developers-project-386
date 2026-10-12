@@ -1,8 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, useLocation } from 'react-router'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
+import { stubJsonFetch } from './test/stubJsonFetch'
 
 function LocationProbe() {
   const location = useLocation()
@@ -17,6 +18,14 @@ function renderApp(path = '/') {
     </MemoryRouter>,
   )
 }
+
+beforeEach(() => {
+  stubJsonFetch([])
+})
+
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
 
 describe('главная страница', () => {
   it('показывает содержимое главной', () => {
@@ -46,7 +55,7 @@ describe('главная страница', () => {
 
     expect(screen.getByTestId('location')).toHaveTextContent('/booking')
     expect(screen.getByRole('heading', { level: 1, name: 'Страница записи' })).toBeInTheDocument()
-    expect(screen.getByText('Скоро появится')).toBeInTheDocument()
+    expect(await screen.findByText('Пока нет доступных типов встреч')).toBeInTheDocument()
   })
 
   it('показывает заглушку /booking и возвращает на главную', async () => {
