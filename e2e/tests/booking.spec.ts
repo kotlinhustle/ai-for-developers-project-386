@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test'
 
 test('владелец создаёт тип, гость бронирует слот, владелец видит запись', async ({ page, request }) => {
-  const typeName = `Консультация ${Date.now()}`
+  const runId = Date.now()
+  const typeName = `Консультация ${runId}`
+  const guestEmail = `guest-${runId}@example.com`
 
   // Owner creates a meeting type
   await page.goto('/owner')
@@ -12,12 +14,15 @@ test('владелец создаёт тип, гость бронирует сл
   const [createResponse] = await Promise.all([
     page.waitForResponse(
       (response) =>
-        response.url().includes('/api/meeting-types') && response.request().method() === 'POST',
+        response.url().includes('/meeting-types') && response.request().method() === 'POST',
     ),
     page.getByRole('button', { name: 'Создать тип встречи' }).click(),
   ])
   expect(createResponse.status()).toBe(201)
   const meetingType = (await createResponse.json()) as { id: string }
+  // Derive the API prefix from the SDK's own request URL ('' when the backend
+  // serves the frontend, '/api' behind the Vite dev proxy).
+  const apiPrefix = new URL(createResponse.url()).pathname.replace(/\/meeting-types$/, '')
 
   // Guest sees the type and its free slots
   await page.goto('/booking')
@@ -32,12 +37,12 @@ test('владелец создаёт тип, гость бронирует сл
   // Guest books the first free slot
   await page.locator('.slots button').first().click()
   await page.getByLabel('Имя').fill('Гость')
-  await page.getByLabel('Email').fill('guest@example.com')
+  await page.getByLabel('Email').fill(guestEmail)
   await page.getByRole('button', { name: 'Записаться' }).click()
   await expect(page.getByText('Вы записаны')).toBeVisible()
 
   // A second booking for the same slot is rejected with 409
-  const conflict = await request.post('/api/bookings', {
+  const conflict = await request.post(`${apiPrefix}/bookings`, {
     data: {
       meetingTypeId: meetingType.id,
       start: bookedStart,
@@ -58,5 +63,5 @@ test('владелец создаёт тип, гость бронирует сл
 
   // Owner sees the booking in the upcoming list
   await page.goto('/owner')
-  await expect(page.getByText('guest@example.com')).toBeVisible()
+  await expect(page.getByText(guestEmail)).toBeVisible()
 })

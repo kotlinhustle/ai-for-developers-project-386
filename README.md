@@ -36,8 +36,9 @@
 │   ├── main.tsp
 │   └── tspconfig.yaml
 ├── e2e/                         # браузерные тесты Playwright
-├── docker-compose.yml           # Postgres для локального запуска
-├── .github/workflows/           # CI (включая E2E), release-please, PR-заголовки
+├── Dockerfile                   # сборка и запуск приложения одним образом
+├── docker-compose.yml           # Postgres (+ приложение) для локального запуска
+├── .github/workflows/           # CI (Backend, Frontend, E2E, Docker), release-please, PR-заголовки
 ├── release-please-config.json   # настройки релизов
 ├── .release-please-manifest.json
 └── version.txt
@@ -149,6 +150,46 @@ npm run generate
 Генерируемые каталоги (`spec/tsp-output/`, `frontend/src/generated/`,
 `backend/build/generated/`) не редактируются руками и не коммитятся — CI
 регенерирует их перед сборкой.
+
+## Docker
+
+Образ собирает контракт (TypeSpec → OpenAPI → клиентский SDK и серверные
+артефакты), фронтенд и бэкенд, и запускает приложение одним процессом: бэкенд
+раздаёт собранный фронтенд и API на **одном порту**. Порт задаётся переменной
+`PORT` (по умолчанию 8080), подключение к Postgres — `DB_URL`, `DB_USER`,
+`DB_PASSWORD`. Vite dev-server и его proxy в контейнере не используются.
+
+Сборка образа из корня репозитория:
+
+```bash
+docker build -t calendar-app .
+```
+
+Полный запуск (Postgres + приложение) через Docker Compose:
+
+```bash
+docker compose up -d --build
+```
+
+Откройте **http://localhost:9000** — интерфейс и API на одном порту
+(`/`, `/booking`, `/owner`, `/meeting-types`, `/bookings`).
+
+Альтернатива — запустить образ вручную в сети Compose (имя сети задано в
+`docker-compose.yml`: `name: calendar` → сеть `calendar_default`):
+
+```bash
+docker compose up -d postgres
+docker run --rm -p 9000:9000 \
+  --network calendar_default \
+  -e PORT=9000 \
+  -e DB_URL=jdbc:postgresql://postgres:5432/calendar \
+  -e DB_USER=postgres \
+  -e DB_PASSWORD=postgres \
+  calendar-app
+```
+
+Для локальной разработки (без контейнера приложения) достаточно только Postgres:
+`docker compose up -d postgres`.
 
 ## Браузерные тесты (Playwright)
 

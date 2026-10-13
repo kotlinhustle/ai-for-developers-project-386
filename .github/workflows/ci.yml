@@ -172,3 +172,52 @@ jobs:
           name: playwright-report
           path: e2e/playwright-report/
           retention-days: 7
+
+  docker:
+    name: Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Build and start (Postgres + app via Compose)
+        run: docker compose up -d --build
+
+      - name: Wait for the app
+        run: |
+          for _ in $(seq 1 90); do
+            if curl -sf http://localhost:9000/actuator/health >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          docker compose logs; exit 1
+
+      - name: Smoke test (SPA + API on one port)
+        run: |
+          curl -sf http://localhost:9000/booking | grep -q 'id="root"'
+          curl -sf http://localhost:9000/owner | grep -q 'id="root"'
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Install Playwright browsers
+        working-directory: e2e
+        run: npm ci && npx playwright install --with-deps chromium
+
+      - name: Run Playwright against the image
+        working-directory: e2e
+        env:
+          E2E_BASE_URL: http://localhost:9000
+        run: npm test
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-docker
+          path: e2e/playwright-report/
+          retention-days: 7
+
+      - name: Stop
+        if: ${{ always() }}
+        run: docker compose down
