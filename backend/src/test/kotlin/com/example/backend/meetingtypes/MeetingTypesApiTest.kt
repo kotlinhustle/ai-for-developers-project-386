@@ -13,6 +13,11 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientResponseException
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.temporal.TemporalAdjusters
+import java.util.UUID
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class MeetingTypesApiTest : PostgresTestSupport() {
@@ -69,12 +74,54 @@ class MeetingTypesApiTest : PostgresTestSupport() {
         assertEquals(422, exception.statusCode.value())
     }
 
+    @Test
+    fun `GET meeting-types slots returns free slots with the owner zone`() {
+        val created = post("""{"name":"Консультация","description":"Разбор","durationMinutes":30}""")
+        val id = Regex("\"id\":\"([^\"]+)\"").find(created.body!!)!!.groupValues[1]
+        val nextMonday = LocalDate.now(ZoneId.of("Asia/Yerevan")).with(TemporalAdjusters.next(DayOfWeek.MONDAY))
+
+        val response = getSlots(id, nextMonday, nextMonday)
+
+        assertEquals(HttpStatus.OK, response.statusCode)
+        assertTrue(response.body!!.contains("\"zoneId\":\"Asia/Yerevan\""))
+        assertTrue(response.body!!.contains("\"start\""))
+    }
+
+    @Test
+    fun `GET meeting-types slots returns 404 for an unknown id`() {
+        val exception =
+            assertThrows<RestClientResponseException> {
+                getSlots(UUID.randomUUID().toString())
+            }
+
+        assertEquals(404, exception.statusCode.value())
+    }
+
     private fun get() =
         rest
             .get()
             .uri("http://localhost:$port/meeting-types")
             .retrieve()
             .toEntity(String::class.java)
+
+    private fun getSlots(
+        id: String,
+        from: LocalDate? = null,
+        to: LocalDate? = null,
+    ) = rest
+        .get()
+        .uri(slotsUri(id, from, to))
+        .retrieve()
+        .toEntity(String::class.java)
+
+    private fun slotsUri(
+        id: String,
+        from: LocalDate?,
+        to: LocalDate?,
+    ): String {
+        val base = "http://localhost:$port/meeting-types/$id/slots"
+        return if (from != null && to != null) "$base?from=$from&to=$to" else base
+    }
 
     private fun post(body: String) =
         rest

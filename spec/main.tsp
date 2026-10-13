@@ -22,6 +22,16 @@ model MeetingTypeCreate {
   durationMinutes: int32;
 }
 
+model Slot {
+  start: utcDateTime;
+  durationMinutes: int32;
+}
+
+model SlotsResponse {
+  zoneId: string;
+  slots: Slot[];
+}
+
 model Problem {
   title: string;
   status: int32;
@@ -46,4 +56,12 @@ interface MeetingTypes {
 
   @post
   create(@body payload: MeetingTypeCreate): MeetingTypeCreated | ValidationFailed;
+
+  @get
+  @route("/{meetingTypeId}/slots")
+  listSlots(
+    @path meetingTypeId: string,
+    @query from?: plainDate,
+    @query to?: plainDate,
+  ): SlotsResponse;
 }

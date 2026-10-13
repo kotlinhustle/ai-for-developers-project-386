@@ -13,7 +13,7 @@ class MeetingTypeEntity(
     val id: UUID,
     @Column(nullable = false)
     var name: String,
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     var description: String,
     @Column(name = "duration_minutes", nullable = false)
     var durationMinutes: Int,
