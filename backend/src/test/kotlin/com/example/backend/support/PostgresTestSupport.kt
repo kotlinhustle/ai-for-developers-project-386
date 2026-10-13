@@ -15,6 +15,7 @@ abstract class PostgresTestSupport {
             registry.add("spring.datasource.username") { "postgres" }
             registry.add("spring.datasource.password") { "" }
             registry.add("spring.jpa.hibernate.ddl-auto") { "validate" }
+            registry.add("spring.flyway.enabled") { "true" }
         }
     }
 }

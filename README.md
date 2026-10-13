@@ -54,19 +54,20 @@ Gradle устанавливать не нужно — используется w
 
 ## База данных
 
-Бэкенд использует Postgres. Для локального запуска поднимите его, например через
-Docker Compose (в корне репозитория):
+С заданной переменной `DB_URL` (плюс `DB_USER`, `DB_PASSWORD`) бэкенд работает с
+Postgres. **Без `DB_URL`** приложение поднимается на встроенной in-memory H2 — так
+образ стартует без внешней БД (например, в автопроверке).
+
+Postgres для локального запуска — через Docker Compose (в корне):
 
 ```bash
 docker compose up -d
+# затем запускать бэкенд с:
+#   DB_URL=jdbc:postgresql://localhost:5432/calendar DB_USER=postgres DB_PASSWORD=postgres
 ```
 
-Параметры подключения по умолчанию (переопределяются переменными окружения
-`DB_URL`, `DB_USER`, `DB_PASSWORD`):
-
-- URL: `jdbc:postgresql://localhost:5432/calendar`
-- пользователь: `postgres`
-- пароль: `postgres`
+По умолчанию (без `DB_URL`) H2 держит данные в памяти и не переживает перезапуск;
+для постоянных данных используйте Postgres через `DB_URL`.
 
 Тесты бэкенда Postgres не требуют — поднимается встроенный (embedded) Postgres.
 

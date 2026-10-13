@@ -52,7 +52,7 @@ cd backend
 
 - Автоформат Kotlin: `.\gradlew.bat ktlintFormat` (или `./gradlew ktlintFormat`).
 - Запуск: `.\gradlew.bat bootRun` (или `./gradlew bootRun`), health: `http://localhost:8080/actuator/health`.
-- Бэкенду нужен Postgres (см. `docker-compose.yml`, переменные `DB_URL`/`DB_USER`/`DB_PASSWORD`); тесты используют встроенный Postgres (embedded) и внешней БД не требуют.
+- Без `DB_URL` бэкенд поднимается на in-memory H2 (образ стартует без внешней БД); с `DB_URL`/`DB_USER`/`DB_PASSWORD` — Postgres (см. `docker-compose.yml`). Тесты используют встроенный Postgres (embedded) и внешней БД не требуют.
 
 Фронтенд:
 
