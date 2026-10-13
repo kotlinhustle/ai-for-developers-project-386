@@ -35,7 +35,9 @@
 ├── spec/                        # TypeSpec-источник контракта (Design First)
 │   ├── main.tsp
 │   └── tspconfig.yaml
-├── .github/workflows/           # CI, release-please, проверка заголовков PR
+├── e2e/                         # браузерные тесты Playwright
+├── docker-compose.yml           # Postgres для локального запуска
+├── .github/workflows/           # CI (включая E2E), release-please, PR-заголовки
 ├── release-please-config.json   # настройки релизов
 ├── .release-please-manifest.json
 └── version.txt
@@ -147,6 +149,24 @@ npm run generate
 Генерируемые каталоги (`spec/tsp-output/`, `frontend/src/generated/`,
 `backend/build/generated/`) не редактируются руками и не коммитятся — CI
 регенерирует их перед сборкой.
+
+## Браузерные тесты (Playwright)
+
+Основной сценарий: владелец создаёт тип встречи → гость выбирает тип и свободный
+слот → бронирует → видит подтверждение → владелец видит запись. Проверяются также
+конфликт брони (`409`) и отсутствие занятого времени среди свободных слотов.
+
+Нужны запущенные бэкенд (с Postgres) и фронтенд (preview-сборка), затем:
+
+```bash
+cd e2e
+npm install
+npx playwright install chromium
+E2E_BASE_URL=http://localhost:4173 npm test
+```
+
+`E2E_BASE_URL` по умолчанию — `http://localhost:4173` (preview фронтенда).
+В CI job `E2E` поднимает Postgres, бэкенд и фронтенд и запускает эти тесты.
 
 ## CI и релизы
 

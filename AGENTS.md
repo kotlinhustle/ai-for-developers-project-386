@@ -18,6 +18,8 @@ frontend/                      React 19 + TypeScript 6.0 + Vite 8.3 + react-rout
   src/App.test.tsx             тесты (Vitest + Testing Library)
 spec/                          TypeSpec-источник контракта (main.tsp, tspconfig.yaml)
   npm run generate             TypeSpec -> OpenAPI -> клиентский SDK + серверные артефакты
+e2e/                           браузерные тесты Playwright (нужны backend + Postgres + frontend)
+  npm test                     основной сценарий + конфликт бронирования
 .github/workflows/
   ci.yml                       push + pull_request: линтеры, тесты, типы, сборка
   release-please.yml           push в main: версия и CHANGELOG
