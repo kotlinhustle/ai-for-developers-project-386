@@ -1,7 +1,8 @@
 # AGENTS.md
 
-Учебный каркас веб-приложения «Календарь звонков»: backend (Kotlin + Spring Boot)
-и frontend (React + TypeScript + Vite). Бизнес-логики пока нет.
+Веб-приложение «Календарь звонков»: backend (Kotlin + Spring Boot) и frontend
+(React + TypeScript + Vite). Владелец создаёт типы встреч и видит записи; гость
+бронирует свободный слот. Демо: https://calendar-y6sf.onrender.com
 
 ## Структура
 
@@ -18,10 +19,13 @@ frontend/                      React 19 + TypeScript 6.0 + Vite 8.3 + react-rout
   src/App.test.tsx             тесты (Vitest + Testing Library)
 spec/                          TypeSpec-источник контракта (main.tsp, tspconfig.yaml)
   npm run generate             TypeSpec -> OpenAPI -> клиентский SDK + серверные артефакты
-e2e/                           браузерные тесты Playwright (нужны backend + Postgres + frontend)
+e2e/                           браузерные тесты Playwright (нужны backend + Postgres или H2 + frontend)
   npm test                     основной сценарий + конфликт бронирования
+Dockerfile                     образ: контракт + фронтенд + бэкенд, один порт (PORT)
+docker-compose.yml             Postgres (+ app) для локального запуска
+opencode.json                  проектная MCP-конфигурация (Render, ключ из env)
 .github/workflows/
-  ci.yml                       push + pull_request: линтеры, тесты, типы, сборка
+  ci.yml                       push + pull_request: Backend, Frontend, E2E, Docker
   release-please.yml           push в main: версия и CHANGELOG
   pr-title.yml                 проверка заголовка PR (Conventional Commits)
   hexlet-check.yml             НЕ ТРОГАТЬ (генерируется Хекслетом)

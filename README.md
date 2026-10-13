@@ -5,11 +5,14 @@
 Учебный проект Хекслета: сервис для бронирования календаря.
 Программа: https://ru.hexlet.io/programs/ai-for-developers
 
-Текущая версия каркаса — учебная, без бизнес-логики.
+## Демо
+
+**https://calendar-y6sf.onrender.com** — развёрнутое приложение (бесплатный тариф
+Render; сервис засыпает при простое, первый запрос после сна — с задержкой).
 
 ## Стек
 
-- **backend/** — Kotlin, Spring Boot 4.1.1, JDK 21, Gradle Kotlin DSL + Gradle Wrapper 9.7.1, Spring Boot Actuator.
+- **backend/** — Kotlin, Spring Boot 4.1.1, JDK 21, Gradle Kotlin DSL + Gradle Wrapper 9.7.1, Spring Data JPA, Flyway, Postgres (H2 без `DB_URL`), Spring Boot Actuator.
 - **frontend/** — React 19, TypeScript 6.0, Vite 8.3, react-router 8, ESLint, Vitest + Testing Library.
 
 Зафиксированные версии: Spring Boot `4.1.1`, Kotlin `2.3.21`, Gradle `9.7.1`, React `19.3.0`, Vite `8.3.4`, TypeScript `~6.0.2`, ESLint `10.12.0`, ktlint-gradle `14.2.0`.
@@ -41,7 +44,8 @@
 ├── .github/workflows/           # CI (Backend, Frontend, E2E, Docker), release-please, PR-заголовки
 ├── release-please-config.json   # настройки релизов
 ├── .release-please-manifest.json
-└── version.txt
+├── version.txt
+└── opencode.json                # проектная MCP-конфигурация (Render, ключ из env)
 ```
 
 ## Требования
@@ -189,8 +193,12 @@ docker run --rm -p 9000:9000 \
   calendar-app
 ```
 
-Для локальной разработки (без контейнера приложения) достаточно только Postgres:
-`docker compose up -d postgres`.
+Без переменных БД образ тоже стартует — приложение поднимается на in-memory H2
+(так работает автопроверка): `docker run -p 8080:8080 -e PORT=8080 calendar-app`.
+
+Для локальной разработки бэкенд можно запускать вообще без Postgres — без `DB_URL`
+он использует in-memory H2. Postgres при необходимости: `docker compose up -d postgres`,
+затем передать `DB_URL`.
 
 ## Деплой (Render)
 
@@ -210,7 +218,7 @@ frankfurt). Приложение слушает `PORT`, подключение �
 слот → бронирует → видит подтверждение → владелец видит запись. Проверяются также
 конфликт брони (`409`) и отсутствие занятого времени среди свободных слотов.
 
-Нужны запущенные бэкенд (с Postgres) и фронтенд (preview-сборка), затем:
+Нужны запущенные бэкенд (с Postgres или H2) и фронтенд (preview-сборка), затем:
 
 ```bash
 cd e2e
@@ -224,8 +232,9 @@ E2E_BASE_URL=http://localhost:4173 npm test
 
 ## CI и релизы
 
-- `.github/workflows/ci.yml` — на `push` и `pull_request` запускает линтеры,
-  тесты, проверку типов и сборку обоих проектов.
+- `.github/workflows/ci.yml` — на `push` и `pull_request` запускает job'ы:
+  `Backend` (ktlint, тесты, сборка), `Frontend` (lint, типы, тесты, сборка),
+  `E2E` (Playwright против preview) и `Docker` (сборка образа + Playwright против образа).
 - `.github/workflows/release-please.yml` — на push в `main` обновляет версию и
   CHANGELOG на основе Conventional Commits.
 - `.github/workflows/pr-title.yml` — проверяет, что заголовок PR соответствует
