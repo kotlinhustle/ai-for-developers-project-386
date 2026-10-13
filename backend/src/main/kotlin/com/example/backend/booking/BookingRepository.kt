@@ -12,4 +12,6 @@ interface BookingRepository : JpaRepository<BookingEntity, UUID> {
         @Param("from") from: OffsetDateTime,
         @Param("to") to: OffsetDateTime,
     ): List<BookingEntity>
+
+    fun findByStartAtGreaterThanEqualOrderByStartAtAsc(start: OffsetDateTime): List<BookingEntity>
 }

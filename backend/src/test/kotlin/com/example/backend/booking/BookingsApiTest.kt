@@ -16,8 +16,11 @@ import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientResponseException
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.OffsetDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.temporal.TemporalAdjusters
+import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.CyclicBarrier
 import java.util.concurrent.Executors
@@ -118,6 +121,39 @@ class BookingsApiTest : PostgresTestSupport() {
     }
 
     @Test
+    fun `lists upcoming bookings of all types sorted by start`() {
+        val first = createMeetingType("Первый", 30)
+        val second = createMeetingType("Второй", 30)
+        postBooking(first, startAt(11, 0))
+        postBooking(second, startAt(9, 0))
+
+        val body = getBookings().body!!
+
+        assertTrue(body.contains("\"meetingTypeId\":\"$first\""))
+        assertTrue(body.contains("\"meetingTypeId\":\"$second\""))
+        assertTrue(body.indexOf("05:00:00Z") < body.indexOf("07:00:00Z"))
+    }
+
+    @Test
+    fun `excludes past bookings from the list`() {
+        val meetingTypeId = createMeetingType("Консультация", 30)
+        val pastStart = OffsetDateTime.now(ZoneOffset.UTC).minusDays(1)
+        bookingRepository.save(
+            BookingEntity(
+                id = UUID.randomUUID(),
+                meetingTypeId = UUID.fromString(meetingTypeId),
+                startAt = pastStart,
+                endAt = pastStart.plusMinutes(30),
+                guestName = "Гость",
+                guestEmail = "guest@example.com",
+                comment = null,
+            ),
+        )
+
+        assertEquals("[]", getBookings().body)
+    }
+
+    @Test
     fun `allows only one of two concurrent bookings for the same slot`() {
         val meetingTypeId = createMeetingType("Консультация", 30)
         val start = startAt(10, 0)
@@ -139,6 +175,13 @@ class BookingsApiTest : PostgresTestSupport() {
         assertEquals(1, results.count { status -> status == 201 })
         assertEquals(1, results.count { status -> status == 409 })
     }
+
+    private fun getBookings() =
+        rest
+            .get()
+            .uri("http://localhost:$port/bookings")
+            .retrieve()
+            .toEntity(String::class.java)
 
     private fun postBookingStatus(
         meetingTypeId: String,

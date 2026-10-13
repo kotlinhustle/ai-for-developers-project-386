@@ -12,6 +12,8 @@ import java.util.UUID
 class BookingsController(
     private val bookingService: BookingService,
 ) : BookingsApi {
+    override fun bookingsList(): ResponseEntity<List<Booking>> = ResponseEntity.ok(bookingService.upcoming().map(BookingEntity::toApiModel))
+
     override fun bookingsCreate(bookingCreate: BookingCreate): ResponseEntity<Booking> {
         val meetingTypeId =
             runCatching { UUID.fromString(bookingCreate.meetingTypeId) }.getOrNull()

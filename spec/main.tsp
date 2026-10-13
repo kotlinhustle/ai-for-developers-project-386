@@ -99,6 +99,9 @@ interface MeetingTypes {
 @tag("Bookings")
 @route("/bookings")
 interface Bookings {
+  @get
+  list(): Booking[];
+
   @post
   create(@body payload: BookingCreate): BookingCreated | ValidationFailed | Conflict;
 }

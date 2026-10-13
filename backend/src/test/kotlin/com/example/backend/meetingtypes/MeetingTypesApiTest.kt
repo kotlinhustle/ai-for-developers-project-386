@@ -1,5 +1,6 @@
 package com.example.backend.meetingtypes
 
+import com.example.backend.booking.BookingRepository
 import com.example.backend.support.PostgresTestSupport
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -28,11 +29,15 @@ class MeetingTypesApiTest : PostgresTestSupport() {
 
     @BeforeEach
     fun cleanDatabase() {
+        bookingRepository.deleteAll()
         repository.deleteAll()
     }
 
     @Autowired
     private lateinit var repository: MeetingTypeRepository
+
+    @Autowired
+    private lateinit var bookingRepository: BookingRepository
 
     @Test
     fun `GET meeting-types returns an empty list`() {

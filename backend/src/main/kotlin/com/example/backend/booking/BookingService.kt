@@ -16,6 +16,11 @@ class BookingService(
     private val bookingPolicy: BookingPolicy,
     private val clock: Clock,
 ) {
+    fun upcoming(): List<BookingEntity> =
+        bookingRepository.findByStartAtGreaterThanEqualOrderByStartAtAsc(
+            clock.instant().atOffset(ZoneOffset.UTC),
+        )
+
     fun book(
         meetingTypeId: UUID,
         start: Instant,

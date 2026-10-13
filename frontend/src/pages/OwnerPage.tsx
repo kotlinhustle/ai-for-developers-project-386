@@ -2,15 +2,24 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router'
 import { meetingTypesApi } from '../api'
+import { formatSlot } from '../format'
 import { ResponseError } from '../generated/api'
+import { useBookings } from '../useBookings'
 import { useMeetingTypes } from '../useMeetingTypes'
+
+const OWNER_ZONE = 'Asia/Yerevan'
 
 function OwnerPage() {
   const { meetingTypes, state, reload } = useMeetingTypes()
+  const { bookings, state: bookingsState } = useBookings()
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [durationMinutes, setDurationMinutes] = useState(30)
   const [createError, setCreateError] = useState<string | null>(null)
+
+  function meetingTypeName(meetingTypeId: string) {
+    return meetingTypes.find((meetingType) => meetingType.id === meetingTypeId)?.name ?? 'Тип встречи'
+  }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -81,6 +90,30 @@ function OwnerPage() {
           </li>
         ))}
       </ul>
+
+      <section className="section" aria-labelledby="bookings-title">
+        <h2 id="bookings-title" className="section__title">
+          Предстоящие записи
+        </h2>
+        {bookingsState === 'loading' && <p className="status status--loading">Загрузка записей…</p>}
+        {bookingsState === 'error' && (
+          <p className="status status--down">Не удалось загрузить записи</p>
+        )}
+        {bookingsState === 'ready' && bookings.length === 0 && (
+          <p className="status status--loading">Пока нет записей</p>
+        )}
+        {bookingsState === 'ready' && bookings.length > 0 && (
+          <ul className="benefits">
+            {bookings.map((booking) => (
+              <li key={booking.id} className="benefits__item">
+                <strong>{meetingTypeName(booking.meetingTypeId)}</strong>:{' '}
+                {formatSlot(booking.start, OWNER_ZONE)} — {booking.guestName} ({booking.guestEmail})
+                {booking.comment ? ` — ${booking.comment}` : ''}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <Link className="button button--secondary" to="/">
         На главную

@@ -2,17 +2,10 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router'
 import { bookingsApi, meetingTypesApi } from '../api'
+import { formatSlot } from '../format'
 import { ResponseError } from '../generated/api'
 import type { Booking, MeetingType, Slot, SlotsResponse } from '../generated/api'
 import { useMeetingTypes } from '../useMeetingTypes'
-
-function formatSlot(start: Date, zoneId: string) {
-  return new Intl.DateTimeFormat('ru-RU', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-    timeZone: zoneId,
-  }).format(start)
-}
 
 function BookingPage() {
   const { meetingTypes, state } = useMeetingTypes()
