@@ -1,3 +1,6 @@
-import { Configuration, MeetingTypesApi } from './generated/api'
+import { BookingsApi, Configuration, MeetingTypesApi } from './generated/api'
 
-export const meetingTypesApi = new MeetingTypesApi(new Configuration({ basePath: '/api' }))
+const configuration = new Configuration({ basePath: '/api' })
+
+export const meetingTypesApi = new MeetingTypesApi(configuration)
+export const bookingsApi = new BookingsApi(configuration)

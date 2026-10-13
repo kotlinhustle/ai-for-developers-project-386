@@ -1,7 +1,9 @@
 package com.example.backend.slots
 
+import com.example.backend.booking.BookingPolicy
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.time.Clock
 import java.time.ZoneId
 
 @Configuration
@@ -12,4 +14,13 @@ class SchedulingConfig {
     @Bean
     fun slotCalculator(ownerSettings: OwnerSettings): SlotCalculator =
         SlotCalculator(ownerSettings.workingHours, ZoneId.of(ownerSettings.zoneId))
+
+    @Bean
+    fun bookingPolicy(
+        slotCalculator: SlotCalculator,
+        ownerSettings: OwnerSettings,
+    ): BookingPolicy = BookingPolicy(slotCalculator, ZoneId.of(ownerSettings.zoneId))
+
+    @Bean
+    fun clock(): Clock = Clock.systemUTC()
 }
