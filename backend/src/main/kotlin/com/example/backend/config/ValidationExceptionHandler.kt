@@ -2,6 +2,7 @@ package com.example.backend.config
 
 import com.example.backend.booking.BookingConflictException
 import com.example.backend.booking.InvalidBookingException
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ProblemDetail
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -26,6 +27,15 @@ class ValidationExceptionHandler {
     @ExceptionHandler(BookingConflictException::class)
     fun handleBookingConflict(exception: BookingConflictException): ProblemDetail =
         problem(HttpStatus.CONFLICT, "Conflict", exception.message)
+
+    @ExceptionHandler(DataIntegrityViolationException::class)
+    fun handleDataIntegrityViolation(exception: DataIntegrityViolationException): ProblemDetail {
+        val isOverlap = exception.mostSpecificCause.message?.contains("bookings_no_overlap") == true
+        if (!isOverlap) {
+            throw exception
+        }
+        return problem(HttpStatus.CONFLICT, "Conflict", "Slot is already booked")
+    }
 
     private fun problem(
         status: HttpStatus,

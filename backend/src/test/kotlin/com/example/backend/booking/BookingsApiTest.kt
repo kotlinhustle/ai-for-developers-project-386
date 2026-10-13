@@ -18,6 +18,10 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.temporal.TemporalAdjusters
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.CyclicBarrier
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BookingsApiTest : PostgresTestSupport() {
@@ -112,6 +116,48 @@ class BookingsApiTest : PostgresTestSupport() {
 
         assertEquals(422, exception.statusCode.value())
     }
+
+    @Test
+    fun `allows only one of two concurrent bookings for the same slot`() {
+        val meetingTypeId = createMeetingType("Консультация", 30)
+        val start = startAt(10, 0)
+        val barrier = CyclicBarrier(2)
+        val latch = CountDownLatch(2)
+        val executor = Executors.newFixedThreadPool(2)
+        val results = IntArray(2)
+
+        for (index in 0 until 2) {
+            executor.execute {
+                barrier.await()
+                results[index] = postBookingStatus(meetingTypeId, start)
+                latch.countDown()
+            }
+        }
+        latch.await(10, TimeUnit.SECONDS)
+        executor.shutdown()
+
+        assertEquals(1, results.count { status -> status == 201 })
+        assertEquals(1, results.count { status -> status == 409 })
+    }
+
+    private fun postBookingStatus(
+        meetingTypeId: String,
+        start: String,
+    ): Int =
+        try {
+            rest
+                .post()
+                .uri("http://localhost:$port/bookings")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(
+                    """{"meetingTypeId":"$meetingTypeId","start":"$start","guestName":"Гость","guestEmail":"guest@example.com"}""",
+                ).retrieve()
+                .toBodilessEntity()
+                .statusCode
+                .value()
+        } catch (exception: RestClientResponseException) {
+            exception.statusCode.value()
+        }
 
     private fun startAt(
         hour: Int,

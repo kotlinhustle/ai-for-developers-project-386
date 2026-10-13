@@ -14,7 +14,7 @@ abstract class PostgresTestSupport {
             registry.add("spring.datasource.url") { postgres.getJdbcUrl("postgres", "postgres") }
             registry.add("spring.datasource.username") { "postgres" }
             registry.add("spring.datasource.password") { "" }
-            registry.add("spring.jpa.hibernate.ddl-auto") { "create-drop" }
+            registry.add("spring.jpa.hibernate.ddl-auto") { "validate" }
         }
     }
 }
